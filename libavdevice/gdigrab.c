@@ -45,6 +45,7 @@ struct gdigrab {
     AVRational time_base;   /**< Time base */
     int64_t    time_frame;  /**< Current time */
 
+    int        radius_circle; /**< Set radius circle of mouse (private option) */
     int        draw_circle_of_mouse; /**< Draw circle of the mouse (private option) */
     int        draw_mouse;  /**< Draw mouse cursor (private option) */
     int        show_region; /**< Draw border (private option) */
@@ -522,7 +523,7 @@ static void paint_mouse_pointer(AVFormatContext *s1, struct gdigrab *gdigrab)
         if (pos.x >= 0 && pos.x <= clip_rect.right - clip_rect.left && pos.y >= 0 && pos.y <= clip_rect.bottom - clip_rect.top) {
             
             if (gdigrab->draw_circle_of_mouse)
-                DrawCircle(gdigrab->dest_hdc, pos.x, pos.y, 20);
+                DrawCircle(gdigrab->dest_hdc, pos.x, pos.y, gdigrab -> radius_circle);
 
             if (!DrawIcon(gdigrab->dest_hdc, pos.x, pos.y, icon))
                 CURSOR_ERROR("Couldn't draw icon");
@@ -659,7 +660,8 @@ static const AVOption options[] = {
     { "video_size", "set video frame size", OFFSET(width), AV_OPT_TYPE_IMAGE_SIZE, {.str = NULL}, 0, 0, DEC },
     { "offset_x", "capture area x offset", OFFSET(offset_x), AV_OPT_TYPE_INT, {.i64 = 0}, INT_MIN, INT_MAX, DEC },
     { "offset_y", "capture area y offset", OFFSET(offset_y), AV_OPT_TYPE_INT, {.i64 = 0}, INT_MIN, INT_MAX, DEC },
-    { "draw_circle_of_mouse", "draw circle of the mouse rgb", OFFSET(draw_circle_of_mouse), AV_OPT_TYPE_INT, {.i64 = 0}, 0, 1, DEC},
+    { "draw_circle_of_mouse", "draw circle of the mouse rgb", OFFSET(draw_circle_of_mouse),  AV_OPT_TYPE_BOOL, {.i64 = 0 }, 0, 1, DEC},
+    { "radius_circle", "radius draw of the mouse circle", OFFSET(radius_circle), AV_OPT_TYPE_INT, {.i64 = 20}, 0, INT_MAX, DEC},
     { NULL },
 };
 
