@@ -476,9 +476,9 @@ error:
  * @param pos_y Position center of line y
  * @param radius Radius of the draw circle
  */
-static void DrawCircle(HDC dc, int pos_x, int pos_y, int radius)
+static void DrawCircle(HDC dc, COLORREF color, int pos_x, int pos_y, int radius)
 {
-    HBRUSH brush = CreateSolidBrush(RGB(255,255,0));
+    HBRUSH brush = CreateSolidBrush(color);
     SelectObject(dc, brush);
     Ellipse(dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
     DeleteObject(brush);
@@ -556,7 +556,7 @@ static void paint_mouse_pointer(AVFormatContext *s1, struct gdigrab *gdigrab)
         if (pos.x >= 0 && pos.x <= clip_rect.right - clip_rect.left && pos.y >= 0 && pos.y <= clip_rect.bottom - clip_rect.top) {
             
             if (gdigrab->draw_circle_of_mouse)
-                DrawCircle(gdigrab->dest_hdc, pos.x, pos.y, gdigrab -> radius_circle);
+                DrawCircle(gdigrab->dest_hdc, gdigrab->circle_info.color, pos.x, pos.y, gdigrab -> radius_circle);
 
             if (!DrawIcon(gdigrab->dest_hdc, pos.x, pos.y, icon))
                 CURSOR_ERROR("Couldn't draw icon");
