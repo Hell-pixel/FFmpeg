@@ -34,6 +34,11 @@
 #include "libavutil/time.h"
 #include <windows.h>
 
+typedef struct CircleInfo{
+    COLORREF color;
+    int opacity;
+} CircleInfo;
+
 /**
  * GDI Device Demuxer context
  */
@@ -45,6 +50,8 @@ struct gdigrab {
     AVRational time_base;   /**< Time base */
     int64_t    time_frame;  /**< Current time */
 
+    CircleInfo circle_info;   /**< Information of circle */
+    char       *rgb_circle;   /**< Set color circle of mouse (private option) */
     int        radius_circle; /**< Set radius circle of mouse (private option) */
     int        draw_circle_of_mouse; /**< Draw circle of the mouse (private option) */
     int        draw_mouse;  /**< Draw mouse cursor (private option) */
@@ -212,6 +219,24 @@ gdigrab_region_wnd_update(AVFormatContext *s1, struct gdigrab *gdigrab)
     while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) {
         DispatchMessage(&msg);
     }
+}
+/**
+ * Parsed string to COLORREF
+ * @param source Source value
+ * @param separator Separator contains a source value
+ * @return COLORREF
+*/
+static COLORREF get_color_by_string(char* source, char* separator)
+{
+    int* temp [3];
+    char* text = strtok(source, separator);
+
+    for(int i = 0; text != NULL; i++){
+        temp[i] = atoi(text);
+        text = strtok(NULL, separator);
+    }
+
+    return RGB(temp[0], temp[1], temp[2]);
 }
 
 /**
@@ -407,6 +432,14 @@ gdigrab_read_header(AVFormatContext *s1)
     gdigrab->clip_rect  = clip_rect;
 
     gdigrab->cursor_error_printed = 0;
+
+    if (gdigrab->draw_circle_of_mouse){
+        CircleInfo circleInfo = {
+            .color = get_color_by_string(gdigrab->rgb_circle, ";;;")
+        };
+
+        gdigrab->circle_info = circleInfo;
+    }
 
     if (gdigrab->show_region) {
         if (gdigrab_region_wnd_init(s1, gdigrab)) {
@@ -662,6 +695,7 @@ static const AVOption options[] = {
     { "offset_y", "capture area y offset", OFFSET(offset_y), AV_OPT_TYPE_INT, {.i64 = 0}, INT_MIN, INT_MAX, DEC },
     { "draw_circle_of_mouse", "draw circle of the mouse rgb", OFFSET(draw_circle_of_mouse),  AV_OPT_TYPE_BOOL, {.i64 = 0 }, 0, 1, DEC},
     { "radius_circle", "radius draw of the mouse circle", OFFSET(radius_circle), AV_OPT_TYPE_INT, {.i64 = 20}, 0, INT_MAX, DEC},
+    { "rgb_circle", "set color circle of the mouse", OFFSET(rgb_circle),  AV_OPT_TYPE_STRING, {.str="255;146;0;"}, 0, 0, DEC},
     { NULL },
 };
 
