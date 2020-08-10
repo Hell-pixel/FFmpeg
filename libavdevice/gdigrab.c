@@ -33,6 +33,13 @@
 #include "libavutil/opt.h"
 #include "libavutil/time.h"
 #include <windows.h>
+#include <wingdi.h>
+
+typedef struct AnimateInfo{
+    int iteration;
+    COLORREF color;
+    boolean isClick;
+} AnimateInfo;
 
 typedef struct CircleInfo{
     COLORREF color;
@@ -50,7 +57,8 @@ struct gdigrab {
     AVRational time_base;   /**< Time base */
     int64_t    time_frame;  /**< Current time */
 
-    int        animation_click; /** < Animation click enabled (private option) */
+    int        animate_acceleration; /** < Animation click animate_acceleration int (private option) */
+    int        animate_click; /** < Animation click enabled (private option) */
     CircleInfo circle_info;   /**< Information of circle */
     char       *rgb_circle;   /**< Set color circle of mouse (private option) */
     int        radius_circle; /**< Set radius circle of mouse (private option) */
@@ -75,6 +83,8 @@ struct gdigrab {
 
     int cursor_error_printed;
 };
+
+AnimateInfo animateInfo;
 
 void CALLBACK HandleWinEvent(HWINEVENTHOOK hook, DWORD event, HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread, DWORD dwmsEventTime);
 LRESULT CALLBACK LowLevelMouseProc (int nCode, WPARAM wParam, LPARAM lParam);
@@ -132,23 +142,49 @@ gdigrab_region_wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
  * @param pos_y Position center of line y
  * @param radius Radius of the draw circle
  */
-static void DrawCircle(HDC dc, COLORREF color, int pos_x, int pos_y, int radius)
-{
-    HBRUSH brush = CreateSolidBrush(color);
-    SelectObject(dc, brush);
-    Ellipse(dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
+static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
+
+    HDC dest_dc = gdigrab->dest_hdc;
+    int radius = gdigrab->radius_circle;
+    int diameter = radius * 2;
+
+    HPEN pen = CreatePen(PS_SOLID, 0, gdigrab->circle_info.color);
+    HBRUSH brush = CreateSolidBrush(gdigrab->circle_info.color);
+    SelectObject(dest_dc, pen);
+    SelectObject(dest_dc, brush);
+
+    BLENDFUNCTION bStruct;
+    bStruct.BlendOp = AC_SRC_OVER;
+    bStruct.BlendFlags = 0;
+    bStruct.SourceConstantAlpha = gdigrab->circle_info.opacity;
+    bStruct.AlphaFormat = AC_SRC_ALPHA;
+    
+    Ellipse(dest_dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
+    GdiAlphaBlend(dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->source_hdc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
     DeleteObject(brush);
+    DeleteObject(pen);
+}
+
+static void DrawAnimateArc(HDC dc, COLORREF color, int pos_x, int pos_y, int radius, int iteration){
+    HPEN pen = CreatePen(PS_SOLID, 3, color);
+    SelectObject(dc, pen);
+    SelectObject(dc, GetStockObject(HOLLOW_BRUSH));
+    int diff = radius + (iteration - radius);
+    Ellipse(dc, pos_x - diff, pos_y - diff, pos_x + diff, pos_y + diff);
+    DeleteObject(pen);
 }
 
 LRESULT CALLBACK LowLevelMouseProc (int nCode, WPARAM wParam, LPARAM lParam){
         switch(wParam)
         {
             case WM_LBUTTONDOWN:
-               printf("\nLEFT\n");
+            animateInfo.color = RGB(255,0,0);
+            animateInfo.isClick = TRUE;
                 break;
 
             case WM_RBUTTONDOWN:
-                printf("\nRIGHT\n");
+            animateInfo.color = RGB(0,0,255);
+            animateInfo.isClick = TRUE;
                 break;
         }
     
@@ -272,14 +308,15 @@ gdigrab_region_wnd_update(AVFormatContext *s1, struct gdigrab *gdigrab)
 }
 
 /**
- * Parsed string to COLORREF
+ * Parsed string to COLORREF and opacity int
  * @param source Source value
  * @param separator Separator contains a source value
- * @return COLORREF
+ * @return CircleInfo
 */
-static COLORREF get_color_by_string(char* source, char* separator)
+
+static CircleInfo get_circle_info_by_parameters(char* source, char* separator)
 {
-    int* temp [3];
+    int* temp[4];
     char* text = strtok(source, separator);
 
     for(int i = 0; text != NULL; i++){
@@ -287,7 +324,12 @@ static COLORREF get_color_by_string(char* source, char* separator)
         text = strtok(NULL, separator);
     }
 
-    return RGB(temp[0], temp[1], temp[2]);
+    CircleInfo info  = {
+        .color = RGB(temp[0], temp[1], temp[2]),
+        .opacity = temp[3]
+    };
+
+    return info;
 }
 
 /**
@@ -485,11 +527,7 @@ gdigrab_read_header(AVFormatContext *s1)
     gdigrab->cursor_error_printed = 0;
 
     if (gdigrab->draw_circle_of_mouse){
-        CircleInfo circleInfo = {
-            .color = get_color_by_string(gdigrab->rgb_circle, ";;;")
-        };
-
-        gdigrab->circle_info = circleInfo;
+        gdigrab->circle_info = get_circle_info_by_parameters(gdigrab->rgb_circle, ";;;;");
     }
 
     if (gdigrab->show_region) {
@@ -499,9 +537,7 @@ gdigrab_read_header(AVFormatContext *s1)
         }
     }
 
-     if (gdigrab->animation_click){
-        printf("Animation click enabled\n");
-        //CONST HANDLE hMutex = CreateMutex(NULL, FALSE, NULL);
+     if (gdigrab->animate_click){
         if(!CreateThread(NULL, 0, &ThreadMouseEvent, NULL, 0, NULL)){
             av_log(s1, AV_LOG_ERROR, "Failed create thread");
         }
@@ -597,9 +633,21 @@ static void paint_mouse_pointer(AVFormatContext *s1, struct gdigrab *gdigrab)
                 ci.ptScreenPos.x, ci.ptScreenPos.y, pos.x, pos.y);
 
         if (pos.x >= 0 && pos.x <= clip_rect.right - clip_rect.left && pos.y >= 0 && pos.y <= clip_rect.bottom - clip_rect.top) {
-            
-            if (gdigrab->draw_circle_of_mouse)
-                DrawCircle(gdigrab->dest_hdc, gdigrab->circle_info.color, pos.x, pos.y, gdigrab -> radius_circle);
+            SelectObject(gdigrab->dest_hdc, GetStockObject(DC_PEN));
+            if (gdigrab->draw_circle_of_mouse){
+                DrawCircle(gdigrab, pos.x, pos.y);
+            }
+
+            if (gdigrab->animate_click)
+            {
+                if (animateInfo.iteration > gdigrab -> radius_circle)
+                {
+                    animateInfo.isClick = FALSE;
+                    animateInfo.iteration = 0;
+                }
+                else
+                    DrawAnimateArc(gdigrab->dest_hdc, animateInfo.color, pos.x, pos.y, gdigrab -> radius_circle, animateInfo.iteration);
+            }
 
             if (!DrawIcon(gdigrab->dest_hdc, pos.x, pos.y, icon))
                 CURSOR_ERROR("Couldn't draw icon");
@@ -676,9 +724,13 @@ static int gdigrab_read_packet(AVFormatContext *s1, AVPacket *pkt)
         WIN32_API_ERROR("Failed to capture image");
         return AVERROR(EIO);
     }
+        
+    if (animateInfo.isClick == TRUE){
+        animateInfo.iteration += gdigrab -> animate_acceleration;
+    }
+
     if (gdigrab->draw_mouse)
         paint_mouse_pointer(s1, gdigrab);
-    //todo draw animate
 
     /* Copy bits to packet data */
 
@@ -739,8 +791,9 @@ static const AVOption options[] = {
     { "offset_y", "capture area y offset", OFFSET(offset_y), AV_OPT_TYPE_INT, {.i64 = 0}, INT_MIN, INT_MAX, DEC },
     { "draw_circle_of_mouse", "draw circle of the mouse rgb", OFFSET(draw_circle_of_mouse),  AV_OPT_TYPE_BOOL, {.i64 = 0 }, 0, 1, DEC },
     { "radius_circle", "radius draw of the mouse circle", OFFSET(radius_circle), AV_OPT_TYPE_INT, {.i64 = 20}, 0, INT_MAX, DEC },
-    { "rgb_circle", "set color circle of the mouse", OFFSET(rgb_circle),  AV_OPT_TYPE_STRING, {.str="255;146;0;"}, 0, 0, DEC },
-    { "animation_click", "enable animation of mouse click", OFFSET(animation_click), AV_OPT_TYPE_BOOL, {.i64 = 0 }, 0, 1, DEC },
+    { "rgba_circle", "set color circle of the mouse", OFFSET(rgb_circle),  AV_OPT_TYPE_STRING, {.str="255;146;0;255;"}, 0, 0, DEC },
+    { "animate_click", "enable animation of mouse click", OFFSET(animate_click), AV_OPT_TYPE_BOOL, {.i64 = 0 }, 0, 1, DEC },
+    { "animate_acceleration", "animate acceleration click mouse", OFFSET(animate_acceleration), AV_OPT_TYPE_INT, {.i64 = 3}, 0, INT_MAX, DEC},
     { NULL },
 };
 
