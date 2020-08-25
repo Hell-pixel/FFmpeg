@@ -74,6 +74,7 @@ struct gdigrab {
     HWND       hwnd;        /**< Handle of the window for the grab */
     HDC        source_hdc;  /**< Source device context */
     HDC        dest_hdc;    /**< Destination, source-compatible DC */
+    HDC        dest_hdc2;    /**< Destination, source-compatible DC */
     BITMAPINFO bmi;         /**< Information describing DIB format */
     HBITMAP    hbmp;        /**< Information on the bitmap captured */
     void      *buffer;      /**< The buffer containing the bitmap image data */
@@ -167,7 +168,7 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     Ellipse(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
     //AlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
     
-    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
+    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->dest_hdc2, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
         printf("\nSuccess\n");
     }
     //SelectObject(dest_dc, oldBmp);
@@ -358,6 +359,7 @@ gdigrab_read_header(AVFormatContext *s1)
     HWND hwnd;
     HDC source_hdc = NULL;
     HDC dest_hdc   = NULL;
+    HDC dest_hdc2 = NULL;
     BITMAPINFO bmi;
     HBITMAP hbmp   = NULL;
     void *buffer   = NULL;
@@ -531,6 +533,7 @@ gdigrab_read_header(AVFormatContext *s1)
     gdigrab->hwnd       = hwnd;
     gdigrab->source_hdc = source_hdc;
     gdigrab->dest_hdc   = dest_hdc;
+    gdigrab->dest_hdc2 = dest_hdc;
     gdigrab->hbmp       = hbmp;
     gdigrab->bmi        = bmi;
     gdigrab->buffer     = buffer;
