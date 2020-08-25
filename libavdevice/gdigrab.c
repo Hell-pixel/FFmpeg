@@ -162,7 +162,7 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     bStruct.AlphaFormat = AC_SRC_ALPHA;
     
     Ellipse(dest_dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
-    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
+    if(GdiAlphaBlend(dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
         printf("\nSuccess\n");
     }
     SelectObject(dest_dc, oldBmp);
