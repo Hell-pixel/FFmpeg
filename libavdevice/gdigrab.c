@@ -150,7 +150,6 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     int radius = gdigrab->radius_circle;
     int diameter = radius * 2;
 
-
     SetDCPenColor(dest_dc, gdigrab->circle_info.color);
     SetDCBrushColor(dest_dc, gdigrab->circle_info.color);
     //HPEN pen = CreatePen(PS_SOLID, 0, gdigrab->circle_info.color);
@@ -165,13 +164,13 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     //bStruct.AlphaFormat = AC_SRC_ALPHA;
     
     Ellipse(dest_dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
-    AlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
-    /*if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
+    //AlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
+    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
         printf("\nSuccess\n");
-    }*/
+    }
     SelectObject(dest_dc, oldBmp);
     //DeleteObject(brush);
-    //DeleteObject(dest_dc);
+    DeleteObject(dest_dc);
     DeleteObject(btmp);
     //DeleteObject(pen);
 }
