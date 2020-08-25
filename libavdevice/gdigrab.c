@@ -144,7 +144,7 @@ gdigrab_region_wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
  */
 static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
 
-    HDC dest_dc = gdigrab->dest_hdc;
+    HDC dest_dc = CreateCompatibleDC(gdigrab->dest_hdc);
     int radius = gdigrab->radius_circle;
     int diameter = radius * 2;
 
@@ -164,6 +164,7 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     Ellipse(dest_dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
     GdiAlphaBlend(dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
     DeleteObject(brush);
+    DeleteObject(dest_dc);
     DeleteObject(pen);
 }
 
