@@ -150,19 +150,17 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
 
     HPEN pen = CreatePen(PS_SOLID, 0, gdigrab->circle_info.color);
     HBRUSH brush = CreateSolidBrush(gdigrab->circle_info.color);
-    SelectObject(dest_dc, pen);
-    SelectObject(dest_dc, brush);
+    SelectObject(gdigrab->dest_hdc, pen);
+    SelectObject(gdigrab->dest_hdc, brush);
 
     BLENDFUNCTION bStruct;
     bStruct.BlendOp = AC_SRC_OVER;
     bStruct.BlendFlags = 0;
     bStruct.SourceConstantAlpha = gdigrab->circle_info.opacity;
     bStruct.AlphaFormat = AC_SRC_ALPHA;
-
-    HDC src_hdc = GetDC(gdigrab->region_hwnd);
     
-    Ellipse(dest_dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
-    GdiAlphaBlend(dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
+    Ellipse(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
+    GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
     DeleteObject(brush);
     DeleteObject(dest_dc);
     DeleteObject(pen);
