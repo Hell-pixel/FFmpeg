@@ -171,10 +171,10 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
         printf("\nSuccess\n");
     }
     //SelectObject(dest_dc, oldBmp);
-    //DeleteObject(brush);
+    DeleteObject(brush);
     DeleteObject(dest_dc);
-    DeleteObject(btmp);
-    //DeleteObject(pen);
+    //DeleteObject(btmp);
+    DeleteObject(pen);
 }
 
 static void DrawAnimateArc(HDC dc, COLORREF color, int pos_x, int pos_y, int radius, int iteration){
