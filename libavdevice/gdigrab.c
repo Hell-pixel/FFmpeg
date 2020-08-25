@@ -150,26 +150,29 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     int radius = gdigrab->radius_circle;
     int diameter = radius * 2;
 
-    HPEN pen = CreatePen(PS_SOLID, 0, gdigrab->circle_info.color);
-    HBRUSH brush = CreateSolidBrush(gdigrab->circle_info.color);
-    SelectObject(dest_dc, pen);
-    SelectObject(dest_dc, brush);
 
-    BLENDFUNCTION bStruct;
-    bStruct.BlendOp = AC_SRC_OVER;
-    bStruct.BlendFlags = 0;
-    bStruct.SourceConstantAlpha = gdigrab->circle_info.opacity;
-    bStruct.AlphaFormat = AC_SRC_ALPHA;
+    SetDCPenColor(dest_dc, gdigrab->circle_info.color);
+    SetDCBrushColor(dest_dc, gdigrab->circle_info.color);
+    //HPEN pen = CreatePen(PS_SOLID, 0, gdigrab->circle_info.color);
+    //HBRUSH brush = CreateSolidBrush(gdigrab->circle_info.color);
+    //SelectObject(dest_dc, pen);
+    //SelectObject(dest_dc, brush);
+
+    BLENDFUNCTION bStruct = {AC_SRC_OVER, 0, 127, AC_SRC_ALPHA};
+    //bStruct.BlendOp = AC_SRC_OVER;
+    //bStruct.BlendFlags = 0;
+    //bStruct.SourceConstantAlpha = gdigrab->circle_info.opacity;
+    //bStruct.AlphaFormat = AC_SRC_ALPHA;
     
     Ellipse(dest_dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
-    if(GdiAlphaBlend(dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
+    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
         printf("\nSuccess\n");
     }
     SelectObject(dest_dc, oldBmp);
-    DeleteObject(brush);
+    //DeleteObject(brush);
     //DeleteObject(dest_dc);
     DeleteObject(btmp);
-    DeleteObject(pen);
+    //DeleteObject(pen);
 }
 
 static void DrawAnimateArc(HDC dc, COLORREF color, int pos_x, int pos_y, int radius, int iteration){
