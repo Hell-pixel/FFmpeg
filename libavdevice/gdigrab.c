@@ -146,7 +146,7 @@ gdigrab_region_wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
 
     HDC dest_dc = CreateCompatibleDC(gdigrab->dest_hdc);
-    BitBlt(dest_dc, 0,0,1920,1080, gdigrab->dest_hdc, 0,0, SRCCOPY);
+    //BitBlt(dest_dc, 0,0,1920,1080, gdigrab->dest_hdc, 0,0, SRCCOPY);
     //BitBlt(gdigrab->dest_hdc, 0,0,1920,1080,dest_dc , 0,0, SRCINVERT);
     //HBITMAP btmp = CreateCompatibleBitmap(gdigrab->dest_hdc, 1920, 1080);
     //SelectObject(dest_dc, btmp);
@@ -157,8 +157,8 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     //SetDCBrushColor(gdigrab->dest_hdc, gdigrab->circle_info.color);
     HPEN pen = CreatePen(PS_SOLID, 0, gdigrab->circle_info.color);
     HBRUSH brush = CreateSolidBrush(gdigrab->circle_info.color);
-    SelectObject(dest_dc, pen);
-    SelectObject(dest_dc, brush);
+    SelectObject(gdigrab->dest_hdc, pen);
+    SelectObject(gdigrab->dest_hdc, brush);
 
     BLENDFUNCTION bStruct = {AC_SRC_OVER, 0, gdigrab->circle_info.opacity, AC_SRC_ALPHA};
     //bStruct.BlendOp = AC_SRC_OVER;
@@ -166,10 +166,10 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     //bStruct.SourceConstantAlpha = gdigrab->circle_info.opacity;
     //bStruct.AlphaFormat = AC_SRC_ALPHA;
     
-    Ellipse(dest_dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
+    Ellipse(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
     //AlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
     
-    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
+    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->source_hdc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
         printf("\nSuccess\n");
     }else{
         printf("\nErr\n");
