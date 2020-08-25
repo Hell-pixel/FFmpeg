@@ -169,7 +169,7 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     Ellipse(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
     //AlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
 
-    HDC test_dc = GetDC(NULL);
+    HDC test_dc = GetDC(HWND_DESKTOP);
 
     int horzres = GetDeviceCaps(test_dc, HORZRES);
     int vertres = GetDeviceCaps(test_dc, VERTRES);
@@ -177,6 +177,15 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     int desktopvertres = GetDeviceCaps(test_dc, DESKTOPVERTRES);
 
     printf("\nHrz:%ld; vert: %ld; dhrz: %ld; dvrtx: %ld\n", horzres, vertres, desktophorzres, desktopvertres);
+
+    HDC test_dc2 = GetDC(gdigrab->hwnd);
+
+    int horzres2 = GetDeviceCaps(test_dc2, HORZRES);
+    int vertres2 = GetDeviceCaps(test_dc2, VERTRES);
+    int desktophorzres2 = GetDeviceCaps(test_dc2, DESKTOPHORZRES);
+    int desktopvertres2 = GetDeviceCaps(test_dc2, DESKTOPVERTRES);
+
+    printf("\nHrz:%ld; vert: %ld; dhrz: %ld; dvrtx: %ld\n", horzres2, vertres2, desktophorzres2, desktopvertres2);
     
     if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->source_hdc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
         printf("\nSuccess\n");
