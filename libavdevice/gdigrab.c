@@ -147,6 +147,7 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
 
     HDC dest_dc = CreateCompatibleDC(gdigrab->dest_hdc);
     BitBlt(dest_dc, 0,0,1920,1080, gdigrab->dest_hdc, 0,0, SRCCOPY);
+    //BitBlt(gdigrab->dest_hdc, 0,0,1920,1080,dest_dc , 0,0, SRCINVERT);
     //HBITMAP btmp = CreateCompatibleBitmap(gdigrab->dest_hdc, 1920, 1080);
     //SelectObject(dest_dc, btmp);
     int radius = gdigrab->radius_circle;
@@ -168,7 +169,7 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     Ellipse(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
     //AlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
     
-    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->dest_hdc2, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
+    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
         printf("\nSuccess\n");
     }else{
         printf("\nErr\n");
