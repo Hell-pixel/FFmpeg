@@ -145,13 +145,15 @@ gdigrab_region_wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
 
     HDC dest_dc = CreateCompatibleDC(gdigrab->dest_hdc);
+    HBITMAP btmp = CreateCompatibleBitmap(gdigrab->dest_hdc, gdigrab->width, gdigrab->height);
+    HBITMAP oldBmp = SelectObject(dest_dc, btmp);
     int radius = gdigrab->radius_circle;
     int diameter = radius * 2;
 
     HPEN pen = CreatePen(PS_SOLID, 0, gdigrab->circle_info.color);
     HBRUSH brush = CreateSolidBrush(gdigrab->circle_info.color);
-    SelectObject(gdigrab->dest_hdc, pen);
-    SelectObject(gdigrab->dest_hdc, brush);
+    SelectObject(dest_dc, pen);
+    SelectObject(dest_dc, brush);
 
     BLENDFUNCTION bStruct;
     bStruct.BlendOp = AC_SRC_OVER;
@@ -159,10 +161,12 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     bStruct.SourceConstantAlpha = gdigrab->circle_info.opacity;
     bStruct.AlphaFormat = AC_SRC_ALPHA;
     
-    Ellipse(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
-    GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->source_hdc, pos_x - radius - gdigrab -> offset_x, pos_y - radius - gdigrab -> offset_y, diameter, diameter, bStruct);
+    Ellipse(dest_dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
+    GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius - gdigrab -> offset_x, pos_y - radius - gdigrab -> offset_y, diameter, diameter, bStruct);
+    SelectObect(dest_dc, oldBmp);
     DeleteObject(brush);
-    DeleteObject(dest_dc);
+    //DeleteObject(dest_dc);
+    DeleteObject(btmp);
     DeleteObject(pen);
 }
 
