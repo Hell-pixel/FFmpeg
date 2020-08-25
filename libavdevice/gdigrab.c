@@ -169,7 +169,8 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     Ellipse(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
     //AlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
 
-    HDC test_dc = GetDC(HWND_DESKTOP);
+    //EnumDisplayMonitors(NULL, NULL, )
+    HDC test_dc = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
 
     int horzres = GetDeviceCaps(test_dc, HORZRES);
     int vertres = GetDeviceCaps(test_dc, VERTRES);
