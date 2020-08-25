@@ -170,25 +170,15 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     //AlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
 
     //EnumDisplayMonitors(NULL, NULL, )
-    HDC test_dc = CreateDC(TEXT("DISPLAY"), NULL, NULL, NULL);
-
+    HDC test_dc = GetDC(NULL);
     int horzres = GetDeviceCaps(test_dc, HORZRES);
     int vertres = GetDeviceCaps(test_dc, VERTRES);
     int desktophorzres = GetDeviceCaps(test_dc, DESKTOPHORZRES);
     int desktopvertres = GetDeviceCaps(test_dc, DESKTOPVERTRES);
 
     printf("\nHrz:%ld; vert: %ld; dhrz: %ld; dvrtx: %ld\n", horzres, vertres, desktophorzres, desktopvertres);
-
-    HDC test_dc2 = GetDC(gdigrab->hwnd);
-
-    int horzres2 = GetDeviceCaps(test_dc2, HORZRES);
-    int vertres2 = GetDeviceCaps(test_dc2, VERTRES);
-    int desktophorzres2 = GetDeviceCaps(test_dc2, DESKTOPHORZRES);
-    int desktopvertres2 = GetDeviceCaps(test_dc2, DESKTOPVERTRES);
-
-    printf("\nHrz:%ld; vert: %ld; dhrz: %ld; dvrtx: %ld\n", horzres2, vertres2, desktophorzres2, desktopvertres2);
     
-    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->source_hdc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
+    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, test_dc, pos_x - radius - gdigrab->offset_x, pos_y - radius, diameter, diameter, bStruct)){
         printf("\nSuccess\n");
     }else{
         printf("\nErr\n");
@@ -552,7 +542,6 @@ gdigrab_read_header(AVFormatContext *s1)
     gdigrab->hwnd       = hwnd;
     gdigrab->source_hdc = source_hdc;
     gdigrab->dest_hdc   = dest_hdc;
-    gdigrab->dest_hdc2 = dest_hdc;
     gdigrab->hbmp       = hbmp;
     gdigrab->bmi        = bmi;
     gdigrab->buffer     = buffer;
