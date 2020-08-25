@@ -150,8 +150,8 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     int radius = gdigrab->radius_circle;
     int diameter = radius * 2;
     
-    SetDCPenColor(gdigrab->dest_hdc, gdigrab->circle_info.color);
-    SetDCBrushColor(gdigrab->dest_hdc, gdigrab->circle_info.color);
+    SetDCPenColor(dest_dc, gdigrab->circle_info.color);
+    SetDCBrushColor(dest_dc, gdigrab->circle_info.color);
     //HPEN pen = CreatePen(PS_SOLID, 0, gdigrab->circle_info.color);
     //HBRUSH brush = CreateSolidBrush(gdigrab->circle_info.color);
     //SelectObject(dest_dc, pen);
@@ -163,7 +163,7 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     //bStruct.SourceConstantAlpha = gdigrab->circle_info.opacity;
     //bStruct.AlphaFormat = AC_SRC_ALPHA;
     
-    Ellipse(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
+    Ellipse(dest_dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
     //AlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
     if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct)){
         printf("\nSuccess\n");
