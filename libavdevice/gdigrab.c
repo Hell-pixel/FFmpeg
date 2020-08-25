@@ -162,7 +162,7 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     HDC src_hdc = GetDC(gdigrab->region_hwnd);
     
     Ellipse(dest_dc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
-    GdiAlphaBlend(dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, src_hdc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
+    GdiAlphaBlend(dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
     DeleteObject(brush);
     DeleteObject(pen);
 }
