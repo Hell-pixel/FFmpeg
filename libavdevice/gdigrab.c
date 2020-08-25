@@ -145,7 +145,7 @@ gdigrab_region_wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
 
     HDC dest_dc = CreateCompatibleDC(gdigrab->dest_hdc);
-    HBITMAP btmp = CreateCompatibleBitmap(gdigrab->dest_hdc, gdigrab->width, gdigrab->height);
+    HBITMAP btmp = CreateCompatibleBitmap(gdigrab->dest_hdc, 1920, 1080);
     HBITMAP oldBmp = SelectObject(dest_dc, btmp);
     int radius = gdigrab->radius_circle;
     int diameter = radius * 2;
