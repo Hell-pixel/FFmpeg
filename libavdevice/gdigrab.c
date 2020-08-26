@@ -74,7 +74,7 @@ struct gdigrab {
     HWND       hwnd;        /**< Handle of the window for the grab */
     HDC        source_hdc;  /**< Source device context */
     HDC        dest_hdc;    /**< Destination, source-compatible DC */
-    HDC        dest_hdc2;    /**< Destination, source-compatible DC */
+    HDC        source_hdc_all;  /**< Souce device context all monitors */
     BITMAPINFO bmi;         /**< Information describing DIB format */
     HBITMAP    hbmp;        /**< Information on the bitmap captured */
     void      *buffer;      /**< The buffer containing the bitmap image data */
@@ -155,7 +155,9 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
 
     BLENDFUNCTION bStruct = {AC_SRC_OVER, 0, gdigrab->circle_info.opacity, AC_SRC_ALPHA};
     
-    GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->source_hdc, pos_x - radius + gdigrab->offset_x, pos_y - radius + gdigrab->offset_y, diameter, diameter, bStruct);
+    Ellipse(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
+    
+    GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->source_hdc_all, pos_x - radius + gdigrab->offset_x, pos_y - radius + gdigrab->offset_y, diameter, diameter, bStruct);
     DeleteObject(brush);
     DeleteObject(pen);
 }
@@ -341,7 +343,7 @@ gdigrab_read_header(AVFormatContext *s1)
     HWND hwnd;
     HDC source_hdc = NULL;
     HDC dest_hdc   = NULL;
-    HDC dest_hdc2 = NULL;
+    HDC source_hdc_all = NULL;
     BITMAPINFO bmi;
     HBITMAP hbmp   = NULL;
     void *buffer   = NULL;
@@ -506,6 +508,8 @@ gdigrab_read_header(AVFormatContext *s1)
     }
     avpriv_set_pts_info(st, 64, 1, 1000000); /* 64 bits pts in us */
 
+    source_hdc_all = GetDC(NULL);
+
     gdigrab->frame_size  = bmp.bmWidthBytes * bmp.bmHeight * bmp.bmPlanes;
     gdigrab->header_size = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) +
                            (bpp <= 8 ? (1 << bpp) : 0) * sizeof(RGBQUAD) /* palette size */;
@@ -515,6 +519,7 @@ gdigrab_read_header(AVFormatContext *s1)
     gdigrab->hwnd       = hwnd;
     gdigrab->source_hdc = source_hdc;
     gdigrab->dest_hdc   = dest_hdc;
+    gdigrab->source_hdc_all = source_hdc_all;
     gdigrab->hbmp       = hbmp;
     gdigrab->bmi        = bmi;
     gdigrab->buffer     = buffer;
