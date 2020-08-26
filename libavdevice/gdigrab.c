@@ -156,8 +156,18 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     BLENDFUNCTION bStruct = {AC_SRC_OVER, 0, gdigrab->circle_info.opacity, AC_SRC_ALPHA};
     
     Ellipse(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
+
+    int position_x = pos_x - radius;
+    int position_y = pos_y - radius;
+    if (position_x < 0){
+        position_x = 0;
+    }
+
+    if (position_y < 0){
+        position_y = 0;
+    }
     
-    if(!GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->source_hdc_all, pos_x - radius + gdigrab->offset_x, pos_y - radius + gdigrab->offset_y, diameter, diameter, bStruct)){
+    if(!GdiAlphaBlend(gdigrab->dest_hdc, position_x, position_y, diameter, diameter, gdigrab->source_hdc_all, position_x + gdigrab->offset_x, position_y + gdigrab->offset_y, diameter, diameter, bStruct)){
         printf("Err");
     }
     DeleteObject(brush);
