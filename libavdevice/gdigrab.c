@@ -159,12 +159,21 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
 
     int position_x = pos_x - radius;
     int position_y = pos_y - radius;
+
     if (position_x < 0){
         position_x = 0;
     }
 
+    if (position_x > gdigrab->width){
+        position_x = gdigrab->width;
+    }
+
     if (position_y < 0){
         position_y = 0;
+    }
+
+    if (position_y > gdigrab->height){
+        position_y = gdigrab->height;
     }
     
     if(!GdiAlphaBlend(gdigrab->dest_hdc, position_x, position_y, diameter, diameter, gdigrab->source_hdc_all, position_x + gdigrab->offset_x, position_y + gdigrab->offset_y, diameter, diameter, bStruct)){
