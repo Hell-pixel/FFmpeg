@@ -161,35 +161,26 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     int position_x = pos_x - radius;
     int position_y = pos_y - radius;
 
+    int diffSize_x = gdigrab->width - pos_x + radius;
+    int diffSize_y = gdigrab->height - pos_y + radius;
+
     if (position_x < 0){
         position_x = 0;
-    }
-
-    if (position_x + diameter_x > gdigrab->width){
-        diameter_x = gdigrab->width;
     }
 
     if (position_y < 0){
         position_y = 0;
     }
 
-    int test = pos_y + radius; // высота вниз
-    int asa = gdigrab-> height - test; // самая нижняя точка
-
-
-    if (asa < 0){
-        diameter_y += asa;
+    if (diffSize_x < 0){
+        diameter_x += diffSize_x;
     }
 
-    if (position_y + diameter_y > gdigrab->height){
-        diameter_y = radius;
+    if (diffSize_y < 0){
+        diameter_y += diffSize_y;
     }
-
-    printf("\nx:%ld; y:%ld\n", diameter_x, diameter_y);
     
-    if(!GdiAlphaBlend(gdigrab->dest_hdc, position_x, position_y, diameter_x, diameter_y, gdigrab->source_hdc_all, position_x + gdigrab->offset_x, position_y + gdigrab->offset_y, diameter_x, diameter_y, bStruct)){
-        printf("Err");
-    }
+    GdiAlphaBlend(gdigrab->dest_hdc, position_x, position_y, diameter_x, diameter_y, gdigrab->source_hdc_all, position_x + gdigrab->offset_x, position_y + gdigrab->offset_y, diameter_x, diameter_y, bStruct);
     DeleteObject(brush);
     DeleteObject(pen);
 }
