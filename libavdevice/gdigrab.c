@@ -176,8 +176,9 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     int test = pos_y + radius; // высота вниз
     int asa = gdigrab-> height - test; // самая нижняя точка
 
+
     if (asa < 0){
-        diameter_y = gdigrab-> height + asa;
+        diameter_y += asa;
     }
 
     if (position_y + diameter_y > gdigrab->height){
