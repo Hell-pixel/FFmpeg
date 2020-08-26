@@ -146,7 +146,8 @@ gdigrab_region_wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
 
     int radius = gdigrab->radius_circle;
-    int diameter = radius * 2;
+    int diameter_x = radius * 2;
+    int diameter_y = diameter_x;
     
     HPEN pen = CreatePen(PS_SOLID, 0, gdigrab->circle_info.color);
     HBRUSH brush = CreateSolidBrush(gdigrab->circle_info.color);
@@ -164,21 +165,28 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
         position_x = 0;
     }
 
-    if (position_x + diameter > gdigrab->width){
-        position_x = gdigrab->width;
+    if (position_x + diameter_x > gdigrab->width){
+        diameter_x = gdigrab->width;
     }
 
     if (position_y < 0){
         position_y = 0;
     }
 
-    if (position_y + diameter > gdigrab->height){
-        position_y = gdigrab->height;
+    int test = pos_y + radius; // высота вниз
+    int asa = gdigrab-> height - test; // самая нижняя точка
+
+    if (asa < 0){
+        diameter_y = gdigrab-> height + asa;
     }
 
-    printf("\nx:%ld; y:%ld\n", position_x, position_y);
+    if (position_y + diameter_y > gdigrab->height){
+        diameter_y = radius;
+    }
+
+    printf("\nx:%ld; y:%ld\n", diameter_x, diameter_y);
     
-    if(!GdiAlphaBlend(gdigrab->dest_hdc, position_x, position_y, diameter, diameter, gdigrab->source_hdc_all, position_x + gdigrab->offset_x, position_y + gdigrab->offset_y, diameter, diameter, bStruct)){
+    if(!GdiAlphaBlend(gdigrab->dest_hdc, position_x, position_y, diameter_x, diameter_y, gdigrab->source_hdc_all, position_x + gdigrab->offset_x, position_y + gdigrab->offset_y, diameter_x, diameter_y, bStruct)){
         printf("Err");
     }
     DeleteObject(brush);
