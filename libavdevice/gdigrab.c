@@ -186,7 +186,7 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
 }
 
 static void DrawAnimateArc(HDC dc, COLORREF color, int pos_x, int pos_y, int radius, int iteration){
-    HPEN pen = CreatePen(PS_SOLID, 3, color);
+    HPEN pen = CreatePen(PS_SOLID, 1, color);
     SelectObject(dc, pen);
     SelectObject(dc, GetStockObject(HOLLOW_BRUSH));
     int diff = radius + (iteration - radius);
