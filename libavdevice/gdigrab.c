@@ -164,7 +164,7 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
         position_x = 0;
     }
 
-    if (position_x > gdigrab->width){
+    if (position_x + diameter > gdigrab->width){
         position_x = gdigrab->width;
     }
 
@@ -172,7 +172,7 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
         position_y = 0;
     }
 
-    if (position_y > gdigrab->height){
+    if (position_y + diameter > gdigrab->height){
         position_y = gdigrab->height;
     }
     
