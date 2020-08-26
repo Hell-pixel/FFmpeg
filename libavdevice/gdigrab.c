@@ -175,6 +175,8 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     if (position_y + diameter > gdigrab->height){
         position_y = gdigrab->height;
     }
+
+    printf("\nx:%ld; y:%ld\n", gdigrab->width, gdigrab->height);
     
     if(!GdiAlphaBlend(gdigrab->dest_hdc, position_x, position_y, diameter, diameter, gdigrab->source_hdc_all, position_x + gdigrab->offset_x, position_y + gdigrab->offset_y, diameter, diameter, bStruct)){
         printf("Err");
