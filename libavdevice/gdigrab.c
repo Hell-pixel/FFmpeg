@@ -176,9 +176,9 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     int desktophorzres = GetDeviceCaps(test_dc, DESKTOPHORZRES);
     int desktopvertres = GetDeviceCaps(test_dc, DESKTOPVERTRES);
 
-    printf("\nHrz:%ld; vert: %ld; dhrz: %ld; dvrtx: %ld\n", horzres, vertres, desktophorzres, desktopvertres);
+    printf("\nHrz:%ld; vert: %ld; dhrz: %ld; dvrtx: %ld\n", pos_x, pos_y, desktophorzres, desktopvertres);
     
-    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, test_dc, pos_x - radius - gdigrab->offset_x, pos_y - radius, diameter, diameter, bStruct)){
+    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, test_dc, pos_x - radius + gdigrab->offset_x, pos_y - radius, diameter, diameter, bStruct)){
         printf("\nSuccess\n");
     }else{
         printf("\nErr\n");
