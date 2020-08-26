@@ -145,44 +145,17 @@ gdigrab_region_wnd_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
  */
 static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
 
-    //HDC dest_dc = CreateCompatibleDC(gdigrab->dest_hdc);
-    //BitBlt(dest_dc, 0,0,1920,1080, gdigrab->dest_hdc, 0,0, SRCCOPY);
-    //BitBlt(gdigrab->dest_hdc, 0,0,1920,1080,dest_dc , 0,0, SRCINVERT);
-    //HBITMAP btmp = CreateCompatibleBitmap(gdigrab->dest_hdc, 1920, 1080);
-    //SelectObject(dest_dc, btmp);
     int radius = gdigrab->radius_circle;
     int diameter = radius * 2;
     
-    //SetDCPenColor(dest_dc, gdigrab->circle_info.color);
-    //SetDCBrushColor(gdigrab->dest_hdc, gdigrab->circle_info.color);
     HPEN pen = CreatePen(PS_SOLID, 0, gdigrab->circle_info.color);
     HBRUSH brush = CreateSolidBrush(gdigrab->circle_info.color);
     SelectObject(gdigrab->dest_hdc, pen);
     SelectObject(gdigrab->dest_hdc, brush);
 
     BLENDFUNCTION bStruct = {AC_SRC_OVER, 0, gdigrab->circle_info.opacity, AC_SRC_ALPHA};
-    //bStruct.BlendOp = AC_SRC_OVER;
-    //bStruct.BlendFlags = 0;
-    //bStruct.SourceConstantAlpha = gdigrab->circle_info.opacity;
-    //bStruct.AlphaFormat = AC_SRC_ALPHA;
     
-    Ellipse(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, pos_x + radius, pos_y + radius);
-    //AlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, dest_dc, pos_x - radius, pos_y - radius, diameter, diameter, bStruct);
-
-    //EnumDisplayMonitors(NULL, NULL, )
-    HDC test_dc = GetDC(NULL);
-    int horzres = GetDeviceCaps(test_dc, HORZRES);
-    int vertres = GetDeviceCaps(test_dc, VERTRES);
-    int desktophorzres = GetDeviceCaps(test_dc, DESKTOPHORZRES);
-    int desktopvertres = GetDeviceCaps(test_dc, DESKTOPVERTRES);
-
-    printf("\nHrz:%ld; vert: %ld; dhrz: %ld; dvrtx: %ld\n", pos_x, pos_y, desktophorzres, desktopvertres);
-    
-    if(GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, test_dc, pos_x - radius + gdigrab->offset_x, pos_y - radius, diameter, diameter, bStruct)){
-        printf("\nSuccess\n");
-    }else{
-        printf("\nErr\n");
-    }
+    GdiAlphaBlend(gdigrab->dest_hdc, pos_x - radius, pos_y - radius, diameter, diameter, gdigrab->source_hdc, pos_x - radius + gdigrab->offset_x, pos_y - radius + gdigrab->offset_y, diameter, diameter, bStruct);
     DeleteObject(brush);
     DeleteObject(pen);
 }
