@@ -161,8 +161,8 @@ static void DrawCircle(struct gdigrab *gdigrab, int pos_x, int pos_y){
     int position_x = pos_x - radius;
     int position_y = pos_y - radius;
 
-    int diffSize_x = gdigrab->width - pos_x + radius;
-    int diffSize_y = gdigrab->height - pos_y + radius;
+    int diffSize_x = gdigrab->width - (pos_x + radius);
+    int diffSize_y = gdigrab->height - (pos_y + radius);
 
     if (position_x < 0){
         position_x = 0;
